@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Тренировки + Аренда</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: #f2f4f8; padding: 16px; max-width: 480px; margin: 0 auto; color: #1c1c1e; padding-bottom: 40px; }
+        .card { background: #ffffff; border-radius: 14px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); }
+        h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .subtitle { color: #8e8e93; font-size: 13px; margin-top: 2px; margin-bottom: 16px; }
+        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #1c1c1e; }
+        input[type="date"], input[type="number"] {
+            width: 100%; padding: 14px 16px; border: 1.5px solid #e5e5ea; border-radius: 12px;
+            font-size: 16px; background: #f8f9fc; margin-bottom: 14px; color: #1c1c1e;
+            -webkit-appearance: none; appearance: none;
+        }
+        input:focus { border-color: #007aff; outline: none; background: #ffffff; }
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+        .btn {
+            padding: 14px 20px; border: none; border-radius: 12px; font-size: 15px;
+            font-weight: 600; cursor: pointer; transition: all 0.15s;
+            flex: 1; min-width: 80px; touch-action: manipulation; user-select: none;
+        }
+        .btn:active { transform: scale(0.96); opacity: 0.8; }
+        .btn-primary { background: #007aff; color: white; }
+        .btn-danger { background: #ff3b30; color: white; }
+        .btn-success { background: #34c759; color: white; }
+        .btn-outline { background: #f2f2f7; color: #1c1c1e; border: 1px solid #e5e5ea; }
+        .btn-sm { padding: 10px 14px; font-size: 13px; flex: 0 1 auto; min-width: 60px; }
+        .btn-purple { background: #af52de; color: white; }
+        .date-list { display: flex; flex-direction: column; gap: 6px; max-height: 500px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .date-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px; border-radius: 10px; transition: all 0.2s;
+        }
+        .date-item .icon { font-size: 18px; margin-right: 10px; }
+        .date-item .num { font-weight: 700; margin-right: 8px; font-size: 14px; }
+        .date-item .date { font-weight: 500; font-size: 15px; }
+        .date-item .day { font-size: 13px; opacity: 0.7; }
+        .info-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 14px 0;
+        }
+        .info-item {
+            background: #f8f9fc; padding: 12px 8px; border-radius: 12px; text-align: center;
+        }
+        .info-item .label { font-size: 10px; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.2px; }
+        .info-item .value { font-size: 20px; font-weight: 700; margin-top: 2px; }
+        .info-item .value.blue { color: #007aff; }
+        .info-item .value.purple { color: #af52de; }
+        .info-item .value.red { color: #ff3b30; }
+        .cancel-entry { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .cancel-entry input[type="date"] { flex: 2; min-width: 100px; margin-bottom: 0; padding: 12px 14px; }
+        .cancel-entry input[type="number"] { flex: 1; min-width: 50px; margin-bottom: 0; padding: 12px 14px; }
+        .cancel-list { margin-top: 12px; }
+        .cancel-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; background: #fef2f2; border-radius: 10px;
+            margin-bottom: 4px; font-size: 14px; border-left: 3px solid #ff3b30;
+        }
+        .cancel-item .del { color: #ff3b30; cursor: pointer; font-weight: 700; padding: 0 8px; font-size: 18px; }
+        .hidden { display: none !important; }
+        .mt-16 { margin-top: 16px; }
+        .empty-state { color: #8e8e93; padding: 20px 0; font-size: 14px; text-align: center; }
+        .bg-blue-light { background: #e8f2ff; }
+        .bg-purple-light { background: #f0e6ff; }
+        .bg-red-light { background: #ffe8e8; }
+        .flex { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .divider { height: 1px; background: #e5e5ea; margin: 16px 0; }
+        .month-separator {
+            display: flex; align-items: center; gap: 10px;
+            margin: 8px 0 4px 0; padding: 4px 0;
+            font-weight: 700; font-size: 14px; color: #1c1c1e;
+        }
+        .month-separator .line {
+            flex: 1; height: 1px; background: #e5e5ea;
+        }
+        .badge-blue { background: #e8f2ff; }
+        .badge-purple { background: #f0e6ff; }
+        .badge-red { background: #ffe8e8; }
+        @media (max-width: 390px) {
+            body { padding: 12px; }
+            .card { padding: 16px; }
+            .btn { font-size: 14px; padding: 12px 16px; }
+            h1 { font-size: 18px; }
+            .info-grid { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+            .info-item { padding: 10px 4px; }
+            .info-item .value { font-size: 17px; }
+            .info-item .label { font-size: 9px; }
+        }
+        input[type="email"], input[type="password"] {
+            width: 100%; padding: 12px 14px; border: 1.5px solid #e5e5ea; border-radius: 12px;
+            font-size: 16px; background: #f8f9fc; margin-bottom: 10px; color: #1c1c1e;
+            -webkit-appearance: none; appearance: none;
+        }
+        .sync-status { font-size: 13px; color: #8e8e93; margin-bottom: 10px; }
+        .check-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 14px; font-weight: 500; }
+        .check-row input { width: 20px; height: 20px; margin: 0; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<div class="card">
+    <div class="section-title">☁️ Синхронизация</div>
+    <div class="sync-status" id="syncStatus">…</div>
+    <div id="syncLogin" class="hidden">
+        <input type="email" id="syncEmail" placeholder="E-mail" autocomplete="username" />
+        <input type="password" id="syncPass" placeholder="Пароль" autocomplete="current-password" />
+        <button class="btn btn-primary" id="syncLoginBtn">Войти</button>
+    </div>
+    <div id="syncLogged" class="hidden flex">
+        <span id="syncUser" style="flex:1;font-size:14px;"></span>
+        <button class="btn btn-outline btn-sm" id="syncLogoutBtn">Выйти</button>
+    </div>
+</div>
+
+<div class="card">
+    <h1>🏋️ Оплаты тренировок + Аренда</h1>
+    <div class="subtitle">10 тренировок · Вт/Чт/Сб · Аренда каждые 30 дней</div>
+
+    <!-- ====== ТРЕНИРОВКИ ====== -->
+    <div class="section-title">🏋️ Тренировки</div>
+    <label for="startDate">📅 Дата первой тренировки</label>
+    <input type="date" id="startDate" />
+
+    <div class="btn-group">
+        <button class="btn btn-primary" id="saveStartBtn">✅ Сохранить</button>
+        <button class="btn btn-outline btn-sm hidden" id="editStartBtn">✏️ Изменить</button>
+    </div>
+
+    <div id="startInfo" class="hidden info-item badge-blue" style="margin-top:8px; padding:12px;">
+        <div class="label">Дата начала цикла</div>
+        <div class="value" id="currentStartDisplay" style="font-size:16px; color:#007aff;">—</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ====== ОТМЕНЫ ====== -->
+    <div class="section-title">❌ Отмена тренировки</div>
+    <div class="cancel-entry">
+        <input type="date" id="cancelDate" />
+        <input type="number" id="cancelCount" value="1" min="1" max="10" />
+        <button class="btn btn-danger btn-sm" id="addCancelBtn">+</button>
+    </div>
+    <div id="cancelList" class="cancel-list"></div>
+</div>
+
+<!-- ====== АРЕНДА ЗАЛА ====== -->
+<div class="card">
+    <div class="section-title">💰 Аренда зала</div>
+    <div class="subtitle">Оплата каждые 30 дней</div>
+
+    <label for="rentDate">📅 Дата последней оплаты аренды</label>
+    <input type="date" id="rentDate" />
+
+    <div class="btn-group">
+        <button class="btn btn-purple" id="saveRentBtn">💾 Сохранить дату аренды</button>
+        <button class="btn btn-outline btn-sm hidden" id="editRentBtn">✏️ Изменить</button>
+    </div>
+
+    <div id="rentInfo" class="hidden info-item badge-purple" style="margin-top:8px; padding:12px;">
+        <div class="label">Последняя оплата аренды</div>
+        <div class="value" id="currentRentDisplay" style="font-size:16px; color:#af52de;">—</div>
+    </div>
+</div>
+
+<!-- ====== РАСЧЁТ ====== -->
+<div class="card">
+    <div class="flex" style="margin-bottom:12px;">
+        <label style="margin-bottom:0;flex:1;">📆 Период:</label>
+        <select id="periodSelect" style="padding:10px 14px;border:1.5px solid #e5e5ea;border-radius:12px;font-size:16px;background:#f8f9fc;flex:2;">
+            <option value="3">3 месяца</option>
+            <option value="6" selected>6 месяцев</option>
+            <option value="12">12 месяцев</option>
+        </select>
+    </div>
+    <button class="btn btn-success" id="calcBtn">📊 Рассчитать всё</button>
+    <label class="check-row"><input type="checkbox" id="hidePast" /> Скрыть прошедшие даты</label>
+
+    <div id="resultArea" class="hidden mt-16">
+        <!-- ====== СТАТИСТИКА В 3 КОЛОНКИ ====== -->
+        <div class="info-grid">
+            <div class="info-item badge-blue">
+                <div class="label">🏋️ Тренировки</div>
+                <div class="value blue" id="totalPayments">0</div>
+            </div>
+            <div class="info-item badge-purple">
+                <div class="label">💰 Аренда</div>
+                <div class="value purple" id="totalRentPayments">0</div>
+            </div>
+            <div class="info-item badge-red">
+                <div class="label">❌ Отменено</div>
+                <div class="value red" id="totalCancels">0</div>
+            </div>
+        </div>
+
+        <div class="section-title" style="margin-top:12px;">📅 Даты оплат</div>
+        <div id="paymentList" class="date-list"></div>
+    </div>
+</div>
+
+<!-- ====== УПРАВЛЕНИЕ ====== -->
+<div class="card" style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="btn btn-outline btn-sm" id="exportBtn">📤 Экспорт</button>
+    <button class="btn btn-outline btn-sm" id="importBtn">📥 Импорт</button>
+    <input type="file" id="importFile" accept=".json" style="display:none;" />
+    <button class="btn btn-danger btn-sm" id="clearBtn">🗑️ Сброс</button>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    const STORAGE_KEY = 'training_rent_data';
+    const DAYS = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    const TRAINING_DAYS = [2, 4, 6];
+    const RENT_INTERVAL_DAYS = 30; // Аренда каждые 30 дней
+
+    // ВСТАВЬТЕ сюда конфиг из Firebase Console (Project settings -> Your apps -> Web app)
+    const FIREBASE_CONFIG = {
+        apiKey: "AIzaSyCUI-CAC8lpNZ1aF6y5qP_Po521MhaWbHU",
+        authDomain: "workout-calculator-b1a10.firebaseapp.com",
+        projectId: "workout-calculator-b1a10",
+        appId: "1:471026254077:web:e13497edbb484439793e94"
+    };
+
+    // 'YYYY-MM-DD' -> локальная полночь (new Date('YYYY-MM-DD') даёт UTC и ломает дни недели западнее UTC)
+    function parseDate(str) {
+        if (str instanceof Date) return new Date(str);
+        var p = String(str).split('-');
+        return new Date(+p[0], +p[1] - 1, +p[2]);
+    }
+    function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+    var remoteHook = null; // подставляется синхронизацией
+
+    function normalize(src) {
+        src = src || {};
+        return {
+            startDate: src.startDate || null,
+            rentDate: src.rentDate || null,
+            cancels: (src.cancels || []).map(function(c) {
+                return { id: c.id || newId(), date: c.date, count: c.count };
+            }),
+            period: src.period || 6,
+            hidePast: !!src.hidePast,
+            updatedAt: src.updatedAt || 0
+        };
+    }
+
+    // Цвета для месяцев (радуга)
+    const MONTH_COLORS = [
+        { bg: '#ffebee', border: '#ef5350', text: '#c62828' },
+        { bg: '#fce4ec', border: '#ec407a', text: '#ad1457' },
+        { bg: '#f3e5f5', border: '#ab47bc', text: '#6a1b9a' },
+        { bg: '#e8eaf6', border: '#5c6bc0', text: '#283593' },
+        { bg: '#e3f2fd', border: '#42a5f5', text: '#0d47a1' },
+        { bg: '#e0f7fa', border: '#26c6da', text: '#00695c' },
+        { bg: '#e8f5e9', border: '#66bb6a', text: '#1b5e20' },
+        { bg: '#f1f8e9', border: '#9ccc65', text: '#33691e' },
+        { bg: '#fff9c4', border: '#fdd835', text: '#f57f17' },
+        { bg: '#fff3e0', border: '#ffa726', text: '#e65100' },
+        { bg: '#fbe9e7', border: '#ff7043', text: '#bf360c' },
+        { bg: '#efebe9', border: '#8d6e63', text: '#4e342e' }
+    ];
+
+    function getMonthColor(month) {
+        return MONTH_COLORS[month % 12];
+    }
+
+    function getMonthName(m) {
+        const names = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                       'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+        return names[m];
+    }
+
+    function loadData() {
+        try {
+            var raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) return normalize(JSON.parse(raw));
+        } catch (e) { console.warn('Load error:', e); }
+        return normalize({});
+    }
+
+    function saveData(d, fromRemote) {
+        if (!fromRemote) d.updatedAt = Date.now();
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+        catch (e) { console.warn('Save error:', e); }
+        if (!fromRemote && remoteHook) remoteHook();
+    }
+
+    function isTrainingDay(d) {
+        return TRAINING_DAYS.includes(d.getDay());
+    }
+
+    function formatDate(d) {
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        return dd + '.' + mm + '.' + yyyy;
+    }
+
+    function formatDateInput(d) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return yyyy + '-' + mm + '-' + dd;
+    }
+
+    function getDayName(d) {
+        return DAYS[d.getDay()];
+    }
+
+    function addDays(d, n) {
+        const r = new Date(d);
+        r.setDate(r.getDate() + n);
+        return r;
+    }
+
+    function addMonths(d, n) {
+        const r = new Date(d);
+        r.setMonth(r.getMonth() + n);
+        return r;
+    }
+
+    function getNextTrainingDay(d) {
+        var r = new Date(d);
+        while (!isTrainingDay(r)) {
+            r = addDays(r, 1);
+        }
+        return r;
+    }
+
+    // ============ РАСЧЁТ ТРЕНИРОВОК ============
+    function calculateTrainingPayments(startDate, cancels, months) {
+        if (!startDate) return { payments: [], totalCancels: 0 };
+        const payments = [];
+        let current = getNextTrainingDay(startDate);
+        const endDate = addMonths(new Date(), months);
+        let totalCancels = 0;
+
+        // Собираем все отмены в Set
+        const cancelSet = new Set();
+        for (var c of cancels) {
+            var d = parseDate(c.date);
+            for (var k = 0; k < c.count; k++) {
+                if (isTrainingDay(d)) {
+                    var key = formatDateInput(d);
+                    if (!cancelSet.has(key) && d >= startDate) totalCancels++; // только уникальные и не раньше старта
+                    cancelSet.add(key);
+                }
+                d = addDays(d, 2);
+                while (!isTrainingDay(d)) {
+                    d = addDays(d, 1);
+                }
+            }
+        }
+
+        for (var i = 0; i < 100; i++) {
+            var count = 0;
+            var nextDate = new Date(current);
+
+            while (count < 10) {
+                var dateStr = formatDateInput(nextDate);
+                if (!cancelSet.has(dateStr)) {
+                    count++;
+                }
+                nextDate = addDays(nextDate, 2);
+                while (!isTrainingDay(nextDate)) {
+                    nextDate = addDays(nextDate, 1);
+                }
+            }
+
+            var nextPayment = getNextTrainingDay(nextDate);
+            var paymentStr = formatDateInput(nextPayment);
+            while (cancelSet.has(paymentStr)) {
+                nextPayment = addDays(nextPayment, 2);
+                nextPayment = getNextTrainingDay(nextPayment);
+                paymentStr = formatDateInput(nextPayment);
+            }
+
+            if (nextPayment > endDate) break;
+            payments.push(new Date(nextPayment));
+            current = new Date(nextPayment);
+        }
+
+        return { payments: payments, totalCancels: totalCancels };
+    }
+
+    // ============ РАСЧЁТ АРЕНДЫ (КАЖДЫЕ 30 ДНЕЙ) ============
+    function calculateRentPayments(rentDate, months) {
+        if (!rentDate) return [];
+        const payments = [];
+        const start = new Date(rentDate);
+        const endDate = addMonths(new Date(), months);
+
+        for (var i = 1; i < 100; i++) {
+            // Прибавляем 30 дней каждый раз
+            var nextPayment = addDays(start, i * RENT_INTERVAL_DAYS);
+            if (nextPayment > endDate) break;
+            payments.push(new Date(nextPayment));
+        }
+        return payments;
+    }
+
+    // ============ DOM ============
+    var data = loadData();
+    var $ = function(id) { return document.getElementById(id); };
+
+    var startDateInput = $('startDate'), saveStartBtn = $('saveStartBtn'), editStartBtn = $('editStartBtn');
+    var startInfo = $('startInfo'), currentStartDisplay = $('currentStartDisplay');
+    var cancelDateInput = $('cancelDate'), cancelCountInput = $('cancelCount'), addCancelBtn = $('addCancelBtn'), cancelListEl = $('cancelList');
+    var rentDateInput = $('rentDate'), saveRentBtn = $('saveRentBtn'), editRentBtn = $('editRentBtn');
+    var rentInfo = $('rentInfo'), currentRentDisplay = $('currentRentDisplay');
+    var calcBtn = $('calcBtn'), periodSelect = $('periodSelect'), hidePastBox = $('hidePast');
+    var resultArea = $('resultArea'), paymentList = $('paymentList');
+    var totalPayments = $('totalPayments'), totalRentPayments = $('totalRentPayments'), totalCancelsDisplay = $('totalCancels');
+    var exportBtn = $('exportBtn'), importBtn = $('importBtn'), importFile = $('importFile'), clearBtn = $('clearBtn');
+
+    // ============ ОТРИСОВКА ============
+    function renderStartDate() {
+        if (data.startDate) {
+            var d = parseDate(data.startDate);
+            startDateInput.value = formatDateInput(d);
+            currentStartDisplay.textContent = formatDate(d) + ' (' + getDayName(d) + ')';
+            startInfo.classList.remove('hidden');
+            startDateInput.disabled = true;
+            saveStartBtn.classList.add('hidden');
+            editStartBtn.classList.remove('hidden');
+        } else {
+            startInfo.classList.add('hidden');
+            startDateInput.disabled = false;
+            saveStartBtn.classList.remove('hidden');
+            editStartBtn.classList.add('hidden');
+        }
+    }
+
+    function renderRentDate() {
+        if (data.rentDate) {
+            var d = parseDate(data.rentDate);
+            rentDateInput.value = formatDateInput(d);
+            currentRentDisplay.textContent = formatDate(d);
+            rentInfo.classList.remove('hidden');
+            rentDateInput.disabled = true;
+            saveRentBtn.classList.add('hidden');
+            editRentBtn.classList.remove('hidden');
+        } else {
+            rentInfo.classList.add('hidden');
+            rentDateInput.disabled = false;
+            saveRentBtn.classList.remove('hidden');
+            editRentBtn.classList.add('hidden');
+        }
+    }
+
+    function renderCancels() {
+        if (!data.cancels || data.cancels.length === 0) {
+            cancelListEl.innerHTML = '<div class="empty-state">Нет отмен</div>';
+            return;
+        }
+        var sorted = data.cancels.slice().sort(function(a, b) { return parseDate(a.date) - parseDate(b.date); });
+        var html = '';
+        for (var i = 0; i < sorted.length; i++) {
+            var c = sorted[i], d = parseDate(c.date);
+            html += '<div class="cancel-item">' +
+                '<span>' + formatDate(d) + ' (' + getDayName(d) + ') — <strong>' + c.count + '</strong> шт.</span>' +
+                '<span class="del" data-id="' + c.id + '">✕</span></div>';
+        }
+        cancelListEl.innerHTML = html;
+        var dels = cancelListEl.querySelectorAll('.del');
+        for (var j = 0; j < dels.length; j++) {
+            dels[j].addEventListener('click', function(e) {
+                e.preventDefault();
+                var id = this.getAttribute('data-id');
+                data.cancels = data.cancels.filter(function(c) { return c.id !== id; });
+                saveData(data);
+                renderCancels();
+                recalc();
+            });
+        }
+    }
+
+    function renderPayments(trainingPayments, rentPayments, totalCancelsCount) {
+        var all = [];
+        trainingPayments.forEach(function(d, i) { all.push({ date: d, type: 'training', num: i + 1 }); });
+        rentPayments.forEach(function(d, i) { all.push({ date: d, type: 'rent', num: i + 1 }); });
+        all.sort(function(a, b) { return a.date - b.date; });
+
+        if (data.hidePast) {
+            var t = new Date(); t.setHours(0, 0, 0, 0);
+            all = all.filter(function(p) { return p.date >= t; });
+        }
+
+        totalPayments.textContent = all.filter(function(p) { return p.type === 'training'; }).length;
+        totalRentPayments.textContent = all.filter(function(p) { return p.type === 'rent'; }).length;
+        totalCancelsDisplay.textContent = totalCancelsCount || 0;
+
+        if (all.length === 0) {
+            paymentList.innerHTML = '<div class="empty-state">📭 Нет оплат за выбранный период</div>';
+            return;
+        }
+
+        var html = '', lastKey = '';
+        for (var k = 0; k < all.length; k++) {
+            var item = all[k], d = item.date;
+            var key = d.getFullYear() + '-' + d.getMonth();
+            var color = getMonthColor(d.getMonth());
+            if (key !== lastKey) {
+                if (lastKey !== '') html += '<div class="month-separator"><span class="line"></span></div>';
+                html += '<div class="month-separator" style="color:' + color.text + ';">📆 ' + getMonthName(d.getMonth()) + ' ' + d.getFullYear() + '</div>';
+                lastKey = key;
+            }
+            var isT = item.type === 'training';
+            html += '<div class="date-item" style="background:' + color.bg + '; border-left:4px solid ' + (isT ? color.border : '#af52de') + ';">' +
+                '<span><span class="icon">' + (isT ? '🏋️' : '💰') + '</span><span class="num" style="color:' + (isT ? color.border : '#af52de') + ';">#' + item.num + '</span><span class="date">' + (isT ? 'Тренировки' : 'Аренда') + '</span></span>' +
+                '<span><span class="day">' + formatDate(d) + ' (' + getDayName(d) + ')</span></span></div>';
+        }
+        paymentList.innerHTML = html;
+    }
+
+    // Расчёт всегда делается заново из сохранённых дат — устаревших результатов не бывает
+    function recalc() {
+        var months = parseInt(periodSelect.value) || 6;
+        var tr = { payments: [], totalCancels: 0 };
+        if (data.startDate) tr = calculateTrainingPayments(parseDate(data.startDate), data.cancels, months);
+        var rp = data.rentDate ? calculateRentPayments(parseDate(data.rentDate), months) : [];
+        if (data.startDate || data.rentDate) {
+            renderPayments(tr.payments, rp, tr.totalCancels);
+            resultArea.classList.remove('hidden');
+        } else {
+            resultArea.classList.add('hidden');
+        }
+    }
+
+    function renderAll() {
+        periodSelect.value = String(data.period || 6);
+        hidePastBox.checked = !!data.hidePast;
+        renderStartDate();
+        renderRentDate();
+        renderCancels();
+        recalc();
+    }
+
+    // ============ СИНХРОНИЗАЦИЯ (Firebase) ============
+    var fb = { auth: null, db: null, user: null, unsub: null };
+    var syncStatus = $('syncStatus'), syncLogin = $('syncLogin'), syncLogged = $('syncLogged');
+
+    function setSync(text) { syncStatus.textContent = text; }
+
+    function payload() {
+        return {
+            startDate: data.startDate || null, rentDate: data.rentDate || null,
+            cancels: data.cancels || [], period: data.period || 6,
+            hidePast: !!data.hidePast, updatedAt: data.updatedAt || 0
+        };
+    }
+
+    function pushRemote() {
+        if (!fb.user) return;
+        setSync('☁️ Сохраняю…');
+        fb.db.collection('users').doc(fb.user.uid).set(payload())
+            .then(function() { setSync('☁️ Синхронизировано'); })
+            .catch(function(err) { setSync('⚠️ Не сохранилось в облако: ' + err.message); });
+    }
+    remoteHook = pushRemote;
+
+    function startListening() {
+        fb.unsub = fb.db.collection('users').doc(fb.user.uid).onSnapshot(function(snap) {
+            var local = data.updatedAt || 0;
+            if (!snap.exists) { pushRemote(); return; }
+            var remote = snap.data();
+            var rt = remote.updatedAt || 0;
+            if (rt > local) {
+                data = normalize(remote);
+                saveData(data, true);
+                renderAll();
+                setSync('☁️ Синхронизировано');
+            } else if (rt < local) {
+                pushRemote();
+            } else {
+                setSync('☁️ Синхронизировано');
+            }
+        }, function(err) { setSync('⚠️ Ошибка облака: ' + err.message); });
+    }
+
+    function initFirebase() {
+        var ok = window.firebase && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.indexOf('ВСТАВЬТЕ') !== 0;
+        if (!ok) { setSync('Облако не настроено — данные только на этом устройстве'); return; }
+        firebase.initializeApp(FIREBASE_CONFIG);
+        fb.auth = firebase.auth();
+        fb.db = firebase.firestore();
+        fb.auth.onAuthStateChanged(function(user) {
+            fb.user = user;
+            if (fb.unsub) { fb.unsub(); fb.unsub = null; }
+            if (user) {
+                syncLogin.classList.add('hidden');
+                syncLogged.classList.remove('hidden');
+                $('syncUser').textContent = user.email;
+                setSync('☁️ Подключаюсь…');
+                startListening();
+            } else {
+                syncLogged.classList.add('hidden');
+                syncLogin.classList.remove('hidden');
+                setSync('Войдите, чтобы данные хранились в облаке');
+            }
+        });
+    }
+
+    $('syncLoginBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (!fb.auth) return;
+        fb.auth.signInWithEmailAndPassword($('syncEmail').value.trim(), $('syncPass').value)
+            .catch(function(err) { alert('Не удалось войти: ' + err.message); });
+    });
+    $('syncLogoutBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (fb.auth) fb.auth.signOut();
+    });
+
+    // ============ СОБЫТИЯ ============
+    saveStartBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var val = startDateInput.value;
+        if (!val) { alert('Выберите дату!'); return; }
+        if (!isTrainingDay(parseDate(val))) { alert('Дата должна быть ВТОРНИК, ЧЕТВЕРГ или СУББОТА!'); return; }
+        data.startDate = val;
+        saveData(data);
+        renderStartDate();
+        recalc();
+    });
+
+    editStartBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        startDateInput.disabled = false;
+        saveStartBtn.classList.remove('hidden');
+        editStartBtn.classList.add('hidden');
+        startInfo.classList.add('hidden');
+    });
+
+    addCancelBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var date = cancelDateInput.value;
+        var count = parseInt(cancelCountInput.value) || 1;
+        if (!date) { alert('Выберите дату отмены!'); return; }
+        if (count < 1 || count > 10) { alert('Количество отмен должно быть от 1 до 10'); return; }
+        if (!isTrainingDay(parseDate(date))) { alert('Отмена только в тренировочный день (Вт/Чт/Сб)!'); return; }
+        data.cancels.push({ id: newId(), date: date, count: count });
+        saveData(data);
+        renderCancels();
+        recalc();
+        cancelDateInput.value = '';
+        cancelCountInput.value = '1';
+    });
+
+    saveRentBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var val = rentDateInput.value;
+        if (!val) { alert('Выберите дату последней оплаты аренды!'); return; }
+        data.rentDate = val;
+        saveData(data);
+        renderRentDate();
+        recalc();
+    });
+
+    editRentBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        rentDateInput.disabled = false;
+        saveRentBtn.classList.remove('hidden');
+        editRentBtn.classList.add('hidden');
+        rentInfo.classList.add('hidden');
+    });
+
+    calcBtn.addEventListener('click', function(e) { e.preventDefault(); recalc(); });
+    periodSelect.addEventListener('change', function() {
+        data.period = parseInt(periodSelect.value) || 6;
+        saveData(data);
+        recalc();
+    });
+    hidePastBox.addEventListener('change', function() {
+        data.hidePast = hidePastBox.checked;
+        saveData(data);
+        recalc();
+    });
+
+    // ============ УПРАВЛЕНИЕ ============
+    exportBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var blob = new Blob([JSON.stringify(payload(), null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = 'training_rent_data.json';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener('click', function(e) { e.preventDefault(); importFile.click(); });
+
+    importFile.addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                var imported = JSON.parse(ev.target.result);
+                if (imported.startDate === undefined && imported.rentDate === undefined) {
+                    alert('❌ Неверный формат файла'); return;
+                }
+                var st = imported.startDate;
+                if (st && !isTrainingDay(parseDate(st))) {
+                    alert('❌ Дата начала в файле — не Вт/Чт/Сб. Импорт отменён.'); return;
+                }
+                data = normalize(imported);
+                saveData(data);
+                renderAll();
+                alert('✅ Данные успешно импортированы!');
+            } catch (err) {
+                alert('❌ Ошибка чтения файла: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+        importFile.value = '';
+    });
+
+    clearBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (confirm('Удалить все данные (в том числе в облаке)?')) {
+            data = normalize({});
+            saveData(data);   // пустые данные с новой меткой времени уйдут в облако
+            renderAll();
+        }
+    });
+
+    // ============ ИНИЦИАЛИЗАЦИЯ ============
+    var todayStr = formatDateInput(new Date());
+    startDateInput.value = todayStr;
+    cancelDateInput.value = todayStr;
+    rentDateInput.value = todayStr;
+
+    renderAll();
+    initFirebase();
+
+})();
+</script>
+
+</body>
+</html>
